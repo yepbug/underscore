@@ -5,37 +5,38 @@
 
 (function() {
 
-  // Baseline setup
+  // 基础配置
   // --------------
 
   // Establish the root object, `window` (`self`) in the browser, `global`
   // on the server, or `this` in some virtual machines. We use `self`
   // instead of `window` for `WebWorker` support.
+  // 找出顶层对象。浏览器端是 window，node 端是 global
+  // 用 self 不是 window 来判断，是因为 webworker 中没有 window
   var root = typeof self == 'object' && self.self === self && self ||
             typeof global == 'object' && global.global === global && global ||
             this ||
             {};
 
-  // Save the previous value of the `_` variable.
+  // 保存之前的 _ 变量
   var previousUnderscore = root._;
 
-  // Save bytes in the minified (but not gzipped) version:
+  // 减小 minified 体积
   var ArrayProto = Array.prototype, ObjProto = Object.prototype;
   var SymbolProto = typeof Symbol !== 'undefined' ? Symbol.prototype : null;
 
-  // Create quick reference variables for speed access to core prototypes.
+  // 保持引用，提高访问 prototype 速度
   var push = ArrayProto.push,
       slice = ArrayProto.slice,
       toString = ObjProto.toString,
       hasOwnProperty = ObjProto.hasOwnProperty;
 
-  // All **ECMAScript 5** native function implementations that we hope to use
-  // are declared here.
+  // 需要用到的 es5 方法
   var nativeIsArray = Array.isArray,
       nativeKeys = Object.keys,
       nativeCreate = Object.create;
 
-  // Naked function reference for surrogate-prototype-swapping.
+  // 一个空方法，在实现原型继承的时候会用到
   var Ctor = function(){};
 
   // Create a safe reference to the Underscore object for use below.
@@ -45,11 +46,7 @@
     this._wrapped = obj;
   };
 
-  // Export the Underscore object for **Node.js**, with
-  // backwards-compatibility for their old module API. If we're in
-  // the browser, add `_` as a global object.
-  // (`nodeType` is checked to ensure that `module`
-  // and `exports` are not HTML elements.)
+  // 为 node.js 中使用。检查 nodeType 是为了保证 exports 和 module 不是 html 元素
   if (typeof exports != 'undefined' && !exports.nodeType) {
     if (typeof module != 'undefined' && !module.nodeType && module.exports) {
       exports = module.exports = _;
@@ -59,12 +56,12 @@
     root._ = _;
   }
 
-  // Current version.
+  // 当前版本
   _.VERSION = '1.9.1';
 
-  // Internal function that returns an efficient (for current engines) version
-  // of the passed-in callback, to be repeatedly applied in other Underscore
-  // functions.
+  // 返回绑定 context 的函数
+  // 区别对待了 call 和 apply。其实随着浏览器发展，这么做的优势已经不明显
+  // 没记错的话，vue 源码中有类似的实现，不过已经加了注释，表示保留该方法只是历史原因
   var optimizeCb = function(func, context, argCount) {
     if (context === void 0) return func;
     switch (argCount == null ? 3 : argCount) {
@@ -97,9 +94,7 @@
     return _.property(value);
   };
 
-  // External wrapper for our callback generator. Users may customize
-  // `_.iteratee` if they want additional predicate/iteratee shorthand styles.
-  // This abstraction hides the internal-only argCount argument.
+  // 回调生成器的包装函数，简化调用
   _.iteratee = builtinIteratee = function(value, context) {
     return cb(value, context, Infinity);
   };
@@ -109,6 +104,7 @@
   // on. This helper accumulates all remaining arguments past the function’s
   // argument length (or an explicit `startIndex`), into an array that becomes
   // the last argument. Similar to ES6’s "rest parameter".
+  // 和 es6 中的 rest 参数类似
   var restArguments = function(func, startIndex) {
     startIndex = startIndex == null ? func.length - 1 : +startIndex;
     return function() {
@@ -132,26 +128,40 @@
     };
   };
 
-  // An internal function for creating a new object that inherits from another.
+  // 创建一个对象的继承对象
   var baseCreate = function(prototype) {
+    // 不是对象，返回空对象
     if (!_.isObject(prototype)) return {};
+    // 支持 create 用 create
     if (nativeCreate) return nativeCreate(prototype);
+    // 不支持的话，用原型
     Ctor.prototype = prototype;
     var result = new Ctor;
     Ctor.prototype = null;
     return result;
   };
 
+  // 返回一个闭包函数
   var shallowProperty = function(key) {
+    // 返回 key 的属性值
     return function(obj) {
       return obj == null ? void 0 : obj[key];
     };
   };
-
+  // 返回对象是否有某个属性
   var has = function(obj, path) {
     return obj != null && hasOwnProperty.call(obj, path);
   }
-
+  // 深度获取对象的属性
+  // 比如：
+  // obj = {
+  //   far: {
+  //     bar: {
+  //       name: 'bar'
+  //     }
+  //   }
+  // }
+  // deepGet(obj, ['far', 'bar', 'name'])
   var deepGet = function(obj, path) {
     var length = path.length;
     for (var i = 0; i < length; i++) {
@@ -167,12 +177,13 @@
   // Avoids a very nasty iOS 8 JIT bug on ARM-64. #2094
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
   var getLength = shallowProperty('length');
+  // 判断是否是类数组对象，有 length 属性，length 类型为 number 且大于0 小于 MAX_ARRAY_INDEX
   var isArrayLike = function(collection) {
     var length = getLength(collection);
     return typeof length == 'number' && length >= 0 && length <= MAX_ARRAY_INDEX;
   };
 
-  // Collection Functions
+  // 数组方法
   // --------------------
 
   // The cornerstone, an `each` implementation, aka `forEach`.
@@ -1677,13 +1688,8 @@
     return String(this._wrapped);
   };
 
-  // AMD registration happens at the end for compatibility with AMD loaders
-  // that may not enforce next-turn semantics on modules. Even though general
-  // practice for AMD registration is to be anonymous, underscore registers
-  // as a named module because, like jQuery, it is a base library that is
-  // popular enough to be bundled in a third party lib, but not be part of
-  // an AMD load request. Those cases could generate an error when an
-  // anonymous define() is called outside of a loader request.
+  // amd 注册方式，通常情况下是注册为一个匿名的模块，不过 underscore 足够出名，
+  // 所以可以有名字
   if (typeof define == 'function' && define.amd) {
     define('underscore', [], function() {
       return _;
