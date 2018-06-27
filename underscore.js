@@ -1,7 +1,7 @@
 //     Underscore.js 1.9.1
-//     http://underscorejs.org
-//     (c) 2009-2018 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
-//     Underscore may be freely distributed under the MIT license.
+// 阅读源码，其实不少方法原生 js 已经提供，比如数组的 map，forEach 等
+// 提高效率的做法，随着浏览器的更新，优势已经不明显
+// 可能有一天，underscore 也会成为历史
 
 (function() {
 
@@ -186,9 +186,8 @@
   // 数组方法
   // --------------------
 
-  // The cornerstone, an `each` implementation, aka `forEach`.
-  // Handles raw objects in addition to array-likes. Treats all
-  // sparse array-likes as if they were dense.
+  // forEach 的实现。
+  // for 循环遍历类数组对象，keys 遍历对象
   _.each = _.forEach = function(obj, iteratee, context) {
     iteratee = optimizeCb(iteratee, context);
     var i, length;
@@ -205,7 +204,7 @@
     return obj;
   };
 
-  // Return the results of applying the iteratee to each element.
+  // map 实现
   _.map = _.collect = function(obj, iteratee, context) {
     iteratee = cb(iteratee, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
@@ -218,10 +217,10 @@
     return results;
   };
 
-  // Create a reducing function iterating left or right.
+  // reduce 生成器，dir 大于0，从左到右
   var createReduce = function(dir) {
-    // Wrap code that reassigns argument variables in a separate function than
-    // the one that accesses `arguments.length` to avoid a perf hit. (#1991)
+    // 之前的版本使用 arguments.length，有性能问题
+    // https://github.com/jashkenas/underscore/pull/1991/commits/2d7a68b34042efd6a3f4be2500e59c158ceccba1
     var reducer = function(obj, iteratee, memo, initial) {
       var keys = !isArrayLike(obj) && _.keys(obj),
           length = (keys || obj).length,
@@ -243,22 +242,20 @@
     };
   };
 
-  // **Reduce** builds up a single result from a list of values, aka `inject`,
-  // or `foldl`.
+  // 从左到右
   _.reduce = _.foldl = _.inject = createReduce(1);
 
-  // The right-associative version of reduce, also known as `foldr`.
+  // 从右到左
   _.reduceRight = _.foldr = createReduce(-1);
 
-  // Return the first value which passes a truth test. Aliased as `detect`.
+  // 返回第一个通过检测的值，类似 indexOf 的作用
   _.find = _.detect = function(obj, predicate, context) {
     var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
     var key = keyFinder(obj, predicate, context);
     if (key !== void 0 && key !== -1) return obj[key];
   };
 
-  // Return all the elements that pass a truth test.
-  // Aliased as `select`.
+  // 返回所有通过检测的值，就是实现了filter
   _.filter = _.select = function(obj, predicate, context) {
     var results = [];
     predicate = cb(predicate, context);
@@ -268,13 +265,12 @@
     return results;
   };
 
-  // Return all the elements for which a truth test fails.
+  // filter 之外的值
   _.reject = function(obj, predicate, context) {
     return _.filter(obj, _.negate(cb(predicate)), context);
   };
 
-  // Determine whether all of the elements match a truth test.
-  // Aliased as `all`.
+  // every 的实现
   _.every = _.all = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
@@ -286,8 +282,7 @@
     return true;
   };
 
-  // Determine if at least one element in the object matches a truth test.
-  // Aliased as `any`.
+  // some 的实现
   _.some = _.any = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
@@ -299,8 +294,7 @@
     return false;
   };
 
-  // Determine if the array or object contains a given item (using `===`).
-  // Aliased as `includes` and `include`.
+  // 数组的 includes 方法
   _.contains = _.includes = _.include = function(obj, item, fromIndex, guard) {
     if (!isArrayLike(obj)) obj = _.values(obj);
     if (typeof fromIndex != 'number' || guard) fromIndex = 0;
@@ -329,24 +323,23 @@
     });
   });
 
-  // Convenience version of a common use case of `map`: fetching a property.
+  // 返回对象的属性，key 是数组的话，调用 deepGet
   _.pluck = function(obj, key) {
     return _.map(obj, _.property(key));
   };
 
-  // Convenience version of a common use case of `filter`: selecting only objects
-  // containing specific `key:value` pairs.
+  // 返回对象列表中有指定键值对的对象
+  // obj 应为一个对象类数组
   _.where = function(obj, attrs) {
     return _.filter(obj, _.matcher(attrs));
   };
 
-  // Convenience version of a common use case of `find`: getting the first object
-  // containing specific `key:value` pairs.
+  // 返回第一个符合键值对的值
   _.findWhere = function(obj, attrs) {
     return _.find(obj, _.matcher(attrs));
   };
 
-  // Return the maximum element (or element-based computation).
+  // 返回 obj 中最大值
   _.max = function(obj, iteratee, context) {
     var result = -Infinity, lastComputed = -Infinity,
         value, computed;
@@ -371,7 +364,7 @@
     return result;
   };
 
-  // Return the minimum element (or element-based computation).
+  // 返回最小值
   _.min = function(obj, iteratee, context) {
     var result = Infinity, lastComputed = Infinity,
         value, computed;
@@ -396,7 +389,7 @@
     return result;
   };
 
-  // Shuffle a collection.
+  // 打乱数组
   _.shuffle = function(obj) {
     return _.sample(obj, Infinity);
   };
@@ -423,7 +416,7 @@
     return sample.slice(0, n);
   };
 
-  // Sort the object's values by a criterion produced by an iteratee.
+  // 返回排序后的数组副本
   _.sortBy = function(obj, iteratee, context) {
     var index = 0;
     iteratee = cb(iteratee, context);
@@ -444,7 +437,7 @@
     }), 'value');
   };
 
-  // An internal function used for aggregate "group by" operations.
+  // 工具方法
   var group = function(behavior, partition) {
     return function(obj, iteratee, context) {
       var result = partition ? [[], []] : {};
@@ -457,27 +450,23 @@
     };
   };
 
-  // Groups the object's values by a criterion. Pass either a string attribute
-  // to group by, or a function that returns the criterion.
+  // 归类集合
   _.groupBy = group(function(result, value, key) {
     if (has(result, key)) result[key].push(value); else result[key] = [value];
   });
 
-  // Indexes the object's values by a criterion, similar to `groupBy`, but for
-  // when you know that your index values will be unique.
+  // 与 groupBy 类似，键唯一的时候使用
   _.indexBy = group(function(result, value, key) {
     result[key] = value;
   });
 
-  // Counts instances of an object that group by a certain criterion. Pass
-  // either a string attribute to count by, or a function that returns the
-  // criterion.
+  // 计数
   _.countBy = group(function(result, value, key) {
     if (has(result, key)) result[key]++; else result[key] = 1;
   });
 
   var reStrSymbol = /[^\ud800-\udfff]|[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]/g;
-  // Safely create a real, live array from anything iterable.
+  // 类数组转数组
   _.toArray = function(obj) {
     if (!obj) return [];
     if (_.isArray(obj)) return slice.call(obj);
@@ -489,33 +478,28 @@
     return _.values(obj);
   };
 
-  // Return the number of elements in an object.
+  // 返回数组长度或对象key数量
   _.size = function(obj) {
     if (obj == null) return 0;
     return isArrayLike(obj) ? obj.length : _.keys(obj).length;
   };
 
-  // Split a collection into two arrays: one whose elements all satisfy the given
-  // predicate, and one whose elements all do not satisfy the predicate.
+  // 根据 partition 条件，把数组一分为二
   _.partition = group(function(result, value, pass) {
     result[pass ? 0 : 1].push(value);
   }, true);
 
-  // Array Functions
+  // 数组方法
   // ---------------
 
-  // Get the first element of an array. Passing **n** will return the first N
-  // values in the array. Aliased as `head` and `take`. The **guard** check
-  // allows it to work with `_.map`.
+  // 返回数组第一个元素
   _.first = _.head = _.take = function(array, n, guard) {
     if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[0];
     return _.initial(array, array.length - n);
   };
 
-  // Returns everything but the last entry of the array. Especially useful on
-  // the arguments object. Passing **n** will return all the values in
-  // the array, excluding the last N.
+  // 返回除最后一个元素外，所有元素
   _.initial = function(array, n, guard) {
     return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   };
@@ -540,7 +524,7 @@
     return _.filter(array, Boolean);
   };
 
-  // Internal implementation of a recursive `flatten` function.
+  // 扁平化数组
   var flatten = function(input, shallow, strict, output) {
     output = output || [];
     var idx = output.length;
@@ -1184,7 +1168,7 @@
     return obj;
   };
 
-  // Returns whether an object has a given set of `key:value` pairs.
+  // 返回对象是否有给定键值对
   _.isMatch = function(object, attrs) {
     var keys = _.keys(attrs), length = keys.length;
     if (object == null) return !length;
@@ -1444,8 +1428,7 @@
     };
   };
 
-  // Returns a predicate for checking whether an object has a given set of
-  // `key:value` pairs.
+  // 闭包，返回的函数检测传入参数是否有指定键值对
   _.matcher = _.matches = function(attrs) {
     attrs = _.extendOwn({}, attrs);
     return function(obj) {
@@ -1461,7 +1444,7 @@
     return accum;
   };
 
-  // Return a random integer between min and max (inclusive).
+  // 返回 min 和 max 之间的随机整数
   _.random = function(min, max) {
     if (max == null) {
       max = min;
