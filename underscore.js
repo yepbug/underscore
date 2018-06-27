@@ -451,6 +451,16 @@
   };
 
   // 归类集合
+  // groupBy 函数的必要参数有两个
+  // obj 需要进行遍历的类数组，iterate 对数组每一项进行的操作
+  // iterate 不一定需要是 function，因为group 方法中进行了如下操作：
+  // iteratee = cb(iteratee, context);
+  // 如果 iterate 是 function，
+  // _.groupBy([1.3, 2.1, 2.4], function(num){ return Math.floor(num); });
+  // => {1: [1.3], 2: [2.1, 2.4]}
+  // iterate 可以是一个表示 key 的字符串
+  // _.groupBy(['one', 'two', 'three'], 'length');
+  // => {3: ["one", "two"], 5: ["three"]}
   _.groupBy = group(function(result, value, key) {
     if (has(result, key)) result[key].push(value); else result[key] = [value];
   });
