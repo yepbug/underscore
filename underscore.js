@@ -398,6 +398,7 @@
   // [Fisher-Yates shuffle](http://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
+  // 打乱数组
   _.sample = function(obj, n, guard) {
     if (n == null || guard) {
       if (!isArrayLike(obj)) obj = _.values(obj);
@@ -514,8 +515,7 @@
     return slice.call(array, 0, Math.max(0, array.length - (n == null || guard ? 1 : n)));
   };
 
-  // Get the last element of an array. Passing **n** will return the last N
-  // values in the array.
+  // 返回最后的 n 个元素
   _.last = function(array, n, guard) {
     if (array == null || array.length < 1) return n == null ? void 0 : [];
     if (n == null || guard) return array[array.length - 1];
