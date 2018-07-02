@@ -561,17 +561,12 @@
     return flatten(array, shallow, false);
   };
 
-  // Return a version of the array that does not contain the specified value(s).
+  // 返回不包含指定值的数组
   _.without = restArguments(function(array, otherArrays) {
     return _.difference(array, otherArrays);
   });
 
-  // Produce a duplicate-free version of the array. If the array has already
-  // been sorted, you have the option of using a faster algorithm.
-  // The faster algorithm will not work with an iteratee if the iteratee
-  // is not a one-to-one function, so providing an iteratee will disable
-  // the faster algorithm.
-  // Aliased as `unique`.
+  // 数组去重，如果已经排序，效率更高
   _.uniq = _.unique = function(array, isSorted, iteratee, context) {
     if (!_.isBoolean(isSorted)) {
       context = iteratee;
@@ -599,14 +594,12 @@
     return result;
   };
 
-  // Produce an array that contains the union: each distinct element from all of
-  // the passed-in arrays.
+  // 返回数组并集。flatten 方法扁平化数组，uniq 去重
   _.union = restArguments(function(arrays) {
     return _.uniq(flatten(arrays, true, true));
   });
 
-  // Produce an array that contains every item shared between all the
-  // passed-in arrays.
+  //去交集
   _.intersection = function(array) {
     var result = [];
     var argsLength = arguments.length;
@@ -622,8 +615,7 @@
     return result;
   };
 
-  // Take the difference between one array and a number of other arrays.
-  // Only the elements present in just the first array will remain.
+  // 返回 array 存在，rest 中不存在的数据
   _.difference = restArguments(function(array, rest) {
     rest = flatten(rest, true, true);
     return _.filter(array, function(value){
@@ -647,9 +639,7 @@
   // an index go together.
   _.zip = restArguments(_.unzip);
 
-  // Converts lists into objects. Pass either a single array of `[key, value]`
-  // pairs, or two parallel arrays of the same length -- one of keys, and one of
-  // the corresponding values. Passing by pairs is the reverse of _.pairs.
+  // 数组转换为对象
   _.object = function(list, values) {
     var result = {};
     for (var i = 0, length = getLength(list); i < length; i++) {
@@ -662,7 +652,7 @@
     return result;
   };
 
-  // Generator function to create the findIndex and findLastIndex functions.
+  // 返回的函数用来生成 findIndex 和 findLastIndex 函数.
   var createPredicateIndexFinder = function(dir) {
     return function(array, predicate, context) {
       predicate = cb(predicate, context);
@@ -675,7 +665,7 @@
     };
   };
 
-  // Returns the first index on an array-like that passes a predicate test.
+  // indexOf
   _.findIndex = createPredicateIndexFinder(1);
   _.findLastIndex = createPredicateIndexFinder(-1);
 
@@ -717,16 +707,11 @@
     };
   };
 
-  // Return the position of the first occurrence of an item in an array,
-  // or -1 if the item is not included in the array.
-  // If the array is large and already in sort order, pass `true`
-  // for **isSorted** to use binary search.
+  // 返回第一个、最后一个符合条件的元素
   _.indexOf = createIndexFinder(1, _.findIndex, _.sortedIndex);
   _.lastIndexOf = createIndexFinder(-1, _.findLastIndex);
 
-  // Generate an integer Array containing an arithmetic progression. A port of
-  // the native Python `range()` function. See
-  // [the Python documentation](http://docs.python.org/library/functions.html#range).
+  // 类似Python 的 range 函数，返回一组整数
   _.range = function(start, stop, step) {
     if (stop == null) {
       stop = start || 0;
@@ -746,8 +731,8 @@
     return range;
   };
 
-  // Chunk a single array into multiple arrays, each containing `count` or fewer
-  // items.
+  // 一维数组转换为二维，每个数组元素包含 count 个 原数组元素
+  // chunk([1,2,3,4,5], 2) =》 [[1, 2], [3, 4], [5]]
   _.chunk = function(array, count) {
     if (count == null || count < 1) return [];
     var result = [];
@@ -758,11 +743,10 @@
     return result;
   };
 
-  // Function (ahem) Functions
+  // 函数相关的方法
   // ------------------
 
-  // Determines whether to execute a function as a constructor
-  // or a normal function with the provided arguments.
+  // 根据参数判断是否调用构造函数
   var executeBound = function(sourceFunc, boundFunc, context, callingContext, args) {
     if (!(callingContext instanceof boundFunc)) return sourceFunc.apply(context, args);
     var self = baseCreate(sourceFunc.prototype);
@@ -771,9 +755,7 @@
     return self;
   };
 
-  // Create a function bound to a given object (assigning `this`, and arguments,
-  // optionally). Delegates to **ECMAScript 5**'s native `Function.bind` if
-  // available.
+  // bind 方法
   _.bind = restArguments(function(func, context, args) {
     if (!_.isFunction(func)) throw new TypeError('Bind must be called on a function');
     var bound = restArguments(function(callArgs) {
@@ -782,10 +764,7 @@
     return bound;
   });
 
-  // Partially apply a function by creating a version that has had some of its
-  // arguments pre-filled, without changing its dynamic `this` context. _ acts
-  // as a placeholder by default, allowing any combination of arguments to be
-  // pre-filled. Set `_.partial.placeholder` for a custom placeholder argument.
+  // 为函数填充部分参数
   _.partial = restArguments(function(func, boundArgs) {
     var placeholder = _.partial.placeholder;
     var bound = function() {
@@ -802,9 +781,7 @@
 
   _.partial.placeholder = _;
 
-  // Bind a number of an object's methods to that object. Remaining arguments
-  // are the method names to be bound. Useful for ensuring that all callbacks
-  // defined on an object belong to it.
+  // 绑定 this
   _.bindAll = restArguments(function(obj, keys) {
     keys = flatten(keys, false, false);
     var index = keys.length;
@@ -815,7 +792,7 @@
     }
   });
 
-  // Memoize an expensive function by storing its results.
+  // 缓存函数运行结果
   _.memoize = function(func, hasher) {
     var memoize = function(key) {
       var cache = memoize.cache;
@@ -827,23 +804,17 @@
     return memoize;
   };
 
-  // Delays a function for the given number of milliseconds, and then calls
-  // it with the arguments supplied.
+  // 延迟 wait 毫秒执行函数
   _.delay = restArguments(function(func, wait, args) {
     return setTimeout(function() {
       return func.apply(null, args);
     }, wait);
   });
 
-  // Defers a function, scheduling it to run after the current call stack has
-  // cleared.
+  // 当前调用栈清空后再调用函数，类似 setTimeout 延迟 0 秒
   _.defer = _.partial(_.delay, _, 1);
 
-  // Returns a function, that, when invoked, will only be triggered at most once
-  // during a given window of time. Normally, the throttled function will run
-  // as much as it can, without ever going more than once per `wait` duration;
-  // but if you'd like to disable the execution on the leading edge, pass
-  // `{leading: false}`. To disable execution on the trailing edge, ditto.
+  // throttle debounce 函数的节流与防抖
   _.throttle = function(func, wait, options) {
     var timeout, context, args, result;
     var previous = 0;
@@ -885,10 +856,7 @@
     return throttled;
   };
 
-  // Returns a function, that, as long as it continues to be invoked, will not
-  // be triggered. The function will be called after it stops being called for
-  // N milliseconds. If `immediate` is passed, trigger the function on the
-  // leading edge, instead of the trailing.
+
   _.debounce = function(func, wait, immediate) {
     var timeout, result;
 
