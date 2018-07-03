@@ -993,8 +993,7 @@
     return values;
   };
 
-  // Returns the results of applying the iteratee to each element of the object.
-  // In contrast to _.map it returns an object.
+  // 与 map 方法相比，遍历的是一个对象
   _.mapObject = function(obj, iteratee, context) {
     iteratee = cb(iteratee, context);
     var keys = _.keys(obj),
@@ -1007,8 +1006,7 @@
     return results;
   };
 
-  // Convert an object into a list of `[key, value]` pairs.
-  // The opposite of _.object.
+  // 返回键值对
   _.pairs = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
@@ -1019,7 +1017,7 @@
     return pairs;
   };
 
-  // Invert the keys and values of an object. The values must be serializable.
+  // 互换键值对，值应是可序列化的
   _.invert = function(obj) {
     var result = {};
     var keys = _.keys(obj);
@@ -1029,8 +1027,7 @@
     return result;
   };
 
-  // Return a sorted list of the function names available on the object.
-  // Aliased as `methods`.
+  // 返回 obj 的 所有方法名
   _.functions = _.methods = function(obj) {
     var names = [];
     for (var key in obj) {
@@ -1065,7 +1062,7 @@
   // (https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object/assign)
   _.extendOwn = _.assign = createAssigner(_.keys);
 
-  // Returns the first key on an object that passes a predicate test.
+  // 返回第一个 符合 predicate 的 key
   _.findKey = function(obj, predicate, context) {
     predicate = cb(predicate, context);
     var keys = _.keys(obj), key;
@@ -1075,12 +1072,12 @@
     }
   };
 
-  // Internal pick helper function to determine if `obj` has key `key`.
+  // obj 是否 有 key 属性.
   var keyInObj = function(value, key, obj) {
     return key in obj;
   };
 
-  // Return a copy of the object only containing the whitelisted properties.
+  // 返回只有 keys 属性的 obj 副本.
   _.pick = restArguments(function(obj, keys) {
     var result = {}, iteratee = keys[0];
     if (obj == null) return result;
@@ -1100,7 +1097,7 @@
     return result;
   });
 
-  // Return a copy of the object without the blacklisted properties.
+  // 返回过滤出除去 keys 后的 obj
   _.omit = restArguments(function(obj, keys) {
     var iteratee = keys[0], context;
     if (_.isFunction(iteratee)) {
@@ -1118,24 +1115,20 @@
   // Fill in a given object with default properties.
   _.defaults = createAssigner(_.allKeys, true);
 
-  // Creates an object that inherits from the given prototype object.
-  // If additional properties are provided then they will be added to the
-  // created object.
+  // Object.create
   _.create = function(prototype, props) {
     var result = baseCreate(prototype);
     if (props) _.extendOwn(result, props);
     return result;
   };
 
-  // Create a (shallow-cloned) duplicate of an object.
+  // 浅拷贝
   _.clone = function(obj) {
     if (!_.isObject(obj)) return obj;
     return _.isArray(obj) ? obj.slice() : _.extend({}, obj);
   };
 
-  // Invokes interceptor with the obj, and then returns obj.
-  // The primary purpose of this method is to "tap into" a method chain, in
-  // order to perform operations on intermediate results within the chain.
+  // 用 obj 作为参数来调用函数 interceptor，然后返回 obj。这种方法的主要意图是作为函数链式调用 的一环, 为了对此对象执行操作并返回对象本身。
   _.tap = function(obj, interceptor) {
     interceptor(obj);
     return obj;
@@ -1260,37 +1253,36 @@
     return true;
   };
 
-  // Perform a deep comparison to check if two objects are equal.
+  // 深度遍历判断是否相等
   _.isEqual = function(a, b) {
     return eq(a, b);
   };
 
-  // Is a given array, string, or object empty?
-  // An "empty" object has no enumerable own-properties.
+  // 是否为空数组或空对象
   _.isEmpty = function(obj) {
     if (obj == null) return true;
     if (isArrayLike(obj) && (_.isArray(obj) || _.isString(obj) || _.isArguments(obj))) return obj.length === 0;
     return _.keys(obj).length === 0;
   };
 
-  // Is a given value a DOM element?
+  // 是否是 DOM element?
   _.isElement = function(obj) {
     return !!(obj && obj.nodeType === 1);
   };
 
-  // Is a given value an array?
+  // 是否是 array?
   // Delegates to ECMA5's native Array.isArray
   _.isArray = nativeIsArray || function(obj) {
     return toString.call(obj) === '[object Array]';
   };
 
-  // Is a given variable an object?
+  // 是否是 object?
   _.isObject = function(obj) {
     var type = typeof obj;
     return type === 'function' || type === 'object' && !!obj;
   };
 
-  // Add some isType methods: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
+  // is 方法: isArguments, isFunction, isString, isNumber, isDate, isRegExp, isError, isMap, isWeakMap, isSet, isWeakSet.
   _.each(['Arguments', 'Function', 'String', 'Number', 'Date', 'RegExp', 'Error', 'Symbol', 'Map', 'WeakMap', 'Set', 'WeakSet'], function(name) {
     _['is' + name] = function(obj) {
       return toString.call(obj) === '[object ' + name + ']';
@@ -1305,8 +1297,7 @@
     };
   }
 
-  // Optimize `isFunction` if appropriate. Work around some typeof bugs in old v8,
-  // IE 11 (#1621), Safari 8 (#1929), and PhantomJS (#2236).
+  // 是否为函数
   var nodelist = root.document && root.document.childNodes;
   if (typeof /./ != 'function' && typeof Int8Array != 'object' && typeof nodelist != 'function') {
     _.isFunction = function(obj) {
@@ -1314,33 +1305,32 @@
     };
   }
 
-  // Is a given object a finite number?
+  // 无穷
   _.isFinite = function(obj) {
     return !_.isSymbol(obj) && isFinite(obj) && !isNaN(parseFloat(obj));
   };
 
-  // Is the given value `NaN`?
+  // 是否是 `NaN`?
   _.isNaN = function(obj) {
     return _.isNumber(obj) && isNaN(obj);
   };
 
-  // Is a given value a boolean?
+  // 是否是一个 Boolean 值
   _.isBoolean = function(obj) {
     return obj === true || obj === false || toString.call(obj) === '[object Boolean]';
   };
 
-  // Is a given value equal to null?
+  // null
   _.isNull = function(obj) {
     return obj === null;
   };
 
-  // Is a given variable undefined?
+  // 是否为 undefined
   _.isUndefined = function(obj) {
     return obj === void 0;
   };
 
-  // Shortcut function for checking if an object has a given property directly
-  // on itself (in other words, not on a prototype).
+  // 检测对象是否有对应属性，可检测嵌套结构
   _.has = function(obj, path) {
     if (!_.isArray(path)) {
       return has(obj, path);
@@ -1356,28 +1346,28 @@
     return !!length;
   };
 
-  // Utility Functions
+  // 工具函数
   // -----------------
 
-  // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
-  // previous owner. Returns a reference to the Underscore object.
+  // 防止命名冲突，类似 jQuery 的 noConflict 方法
   _.noConflict = function() {
     root._ = previousUnderscore;
     return this;
   };
 
-  // Keep the identity function around for default iteratees.
+  // 默认迭代器，什么都没做
   _.identity = function(value) {
     return value;
   };
 
-  // Predicate-generating functions. Often useful outside of Underscore.
+  // 始终返回相同的值
   _.constant = function(value) {
     return function() {
       return value;
     };
   };
 
+  // 空函数
   _.noop = function(){};
 
   // Creates a function that, when passed an object, will traverse that object’s
@@ -1596,7 +1586,7 @@
     return instance._chain ? _(obj).chain() : obj;
   };
 
-  // Add your own custom functions to the Underscore object.
+  // 自有函数添加到 _
   _.mixin = function(obj) {
     _.each(_.functions(obj), function(name) {
       var func = _[name] = obj[name];
