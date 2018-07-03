@@ -886,22 +886,19 @@
     return debounced;
   };
 
-  // Returns the first function passed as an argument to the second,
-  // allowing you to adjust arguments, run code before and after, and
-  // conditionally execute the original function.
+  // 将第一个函数 function 封装到函数 wrapper 里面, 并把函数 function 作为第一个参数传给 wrapper.
   _.wrap = function(func, wrapper) {
     return _.partial(wrapper, func);
   };
 
-  // Returns a negated version of the passed-in predicate.
+  // 否定版本 predicate.
   _.negate = function(predicate) {
     return function() {
       return !predicate.apply(this, arguments);
     };
   };
 
-  // Returns a function that is the composition of a list of functions, each
-  // consuming the return value of the function that follows.
+  // 返回函数集 functions 组合后的复合函数, 也就是一个函数执行完之后把返回的结果再作为参数赋给下一个函数来执行. 以此类推. 在数学里, 把函数 f(), g(), 和 h() 组合起来可以得到复合函数 f(g(h()))。
   _.compose = function() {
     var args = arguments;
     var start = args.length - 1;
@@ -913,7 +910,7 @@
     };
   };
 
-  // Returns a function that will only be executed on and after the Nth call.
+  // 执行 times 次后，才会真正执行
   _.after = function(times, func) {
     return function() {
       if (--times < 1) {
@@ -922,7 +919,7 @@
     };
   };
 
-  // Returns a function that will only be executed up to (but not including) the Nth call.
+  // 至多调用 times - 1 次
   _.before = function(times, func) {
     var memo;
     return function() {
@@ -934,8 +931,7 @@
     };
   };
 
-  // Returns a function that will be executed at most one time, no matter how
-  // often you call it. Useful for lazy initialization.
+  // 至多调用一次
   _.once = _.partial(_.before, 2);
 
   _.restArguments = restArguments;
@@ -965,8 +961,7 @@
     }
   };
 
-  // Retrieve the names of an object's own properties.
-  // Delegates to **ECMAScript 5**'s native `Object.keys`.
+  // `Object.keys`
   _.keys = function(obj) {
     if (!_.isObject(obj)) return [];
     if (nativeKeys) return nativeKeys(obj);
@@ -977,7 +972,7 @@
     return keys;
   };
 
-  // Retrieve all the property names of an object.
+  // for in 遍历，所有属性，包括原型
   _.allKeys = function(obj) {
     if (!_.isObject(obj)) return [];
     var keys = [];
@@ -987,7 +982,7 @@
     return keys;
   };
 
-  // Retrieve the values of an object's properties.
+  // 返回所有属性值
   _.values = function(obj) {
     var keys = _.keys(obj);
     var length = keys.length;
